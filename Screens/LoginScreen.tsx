@@ -7,6 +7,9 @@ import {
   Animated,
   Dimensions,
   StyleSheet,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useState, useEffect, useRef } from "react";
 
@@ -14,46 +17,9 @@ import PasswordField from "@/components/PasswordField";
 import Button from "@/components/Button";
 
 export default function LoginScreen() {
-  const bottomPosition = useRef(new Animated.Value(0)).current;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        Animated.timing(bottomPosition, {
-          toValue: 170,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-      }
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        Animated.timing(bottomPosition, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-      }
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, [bottomPosition]);
-
-  const handleBlur = (qq: any) => {
-    if (
-      qq.target._internalFiberInstanceHandleDEV.elementType !==
-      "RCTSinglelineTextInputView"
-    )
-      Keyboard.dismiss();
-  };
   const handleSubmit = () => {
     Keyboard.dismiss();
     if (email.trim() === "" || password.trim() === "") return;
@@ -65,63 +31,75 @@ export default function LoginScreen() {
   };
 
   return (
-    <View onTouchStart={handleBlur}>
-      <Image
-        source={require("@/assets/images/Photo BG.jpg")}
-        style={styles.bgImage}
-      />
-      <Animated.View style={[styles.container, { bottom: bottomPosition }]}>
-        <Text style={styles.h2}>Увійти</Text>
-        <View style={[styles.formContainer]}>
-          <TextInput
-            onChangeText={setEmail}
-            value={email}
-            autoComplete="email"
-            autoCorrect={false}
-            style={styles.input}
-            placeholder="Адреса електронної пошти"
-          />
-          <PasswordField
-            type="current-password"
-            onChangeText={(item) => setPassword(item)}
-            value={password}
-            styles={styles}
-          />
-          <Button
-            onPress={() => handleSubmit()}
-            style={{
-              buttonBg: styles.buttonOrangeBg,
-              buttonText: styles.buttonOrangeText,
-            }}
-            title="Увійти"
-          />
-          <Button
-            onPress={() => console.log("switch to login")}
-            style={{
-              buttonBg: styles.buttonTransperentBg,
-              buttonText: styles.buttonTransperentText,
-            }}
-            title="Немає акаунту? Зареєструватися"
-          />
-        </View>
-      </Animated.View>
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.wrapper}>
+        <Image
+          source={require("@/assets/images/Photo BG.jpg")}
+          style={styles.bgImage}
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS == "ios" ? "padding" : "height"}
+        >
+          <View style={styles.container}>
+            <Text style={styles.h2}>Увійти</Text>
+            <View style={[styles.formContainer]}>
+              <TextInput
+                onChangeText={setEmail}
+                value={email}
+                autoComplete="email"
+                autoCorrect={false}
+                style={styles.input}
+                placeholder="Адреса електронної пошти"
+              />
+              <PasswordField
+                type="current-password"
+                onChangeText={(item) => setPassword(item)}
+                value={password}
+                styles={styles}
+              />
+              <Button
+                onPress={() => handleSubmit()}
+                style={{
+                  buttonBg: styles.buttonOrangeBg,
+                  buttonText: styles.buttonOrangeText,
+                }}
+                title="Увійти"
+              />
+              <Button
+                onPress={() => console.log("switch to login")}
+                style={{
+                  buttonBg: styles.buttonTransperentBg,
+                  buttonText: styles.buttonTransperentText,
+                }}
+                title="Немає акаунту? Зареєструватися"
+              />
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    display: "flex",
+    height: "100%",
+    justifyContent: "flex-end",
+  },
+
   bgImage: {
     width: "100%",
     height: "100%",
+    position: "absolute",
   },
   container: {
     width: "100%",
-    height: "100%",
-    transform: [{ translateY: -Dimensions.get("window").height * 1.55 }],
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     backgroundColor: "#fff",
     position: "relative",
+    paddingBottom: 30,
   },
 
   h2: {

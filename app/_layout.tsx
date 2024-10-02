@@ -5,7 +5,6 @@ import { useFonts } from "expo-font";
 import RegistrationScreen from "@/Screens/RegistrationScreen";
 import LoginScreen from "@/Screens/LoginScreen";
 import PostsScreen from "@/Screens/PostsScreen";
-import App from "@/Screens/App";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,5 +15,5 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return <RegistrationScreen />;
+  return <LoginScreen />;
 }
