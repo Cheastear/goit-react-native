@@ -1,14 +1,13 @@
-import { Formik } from "formik";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import {
   View,
-  ScrollView,
   Image,
   Text,
   TextInput,
   Keyboard,
-  Animated,
-  Dimensions,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 import { StyleSheet } from "react-native";
 
@@ -23,47 +22,10 @@ type FormType = {
 };
 
 export default function RegistrationScreen() {
-  const bottomPosition = useRef(new Animated.Value(0)).current;
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        Animated.timing(bottomPosition, {
-          toValue: 170,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-      }
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        Animated.timing(bottomPosition, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-      }
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, [bottomPosition]);
-
-  const handleBlur = (qq: any) => {
-    if (
-      qq.target._internalFiberInstanceHandleDEV.elementType !==
-      "RCTSinglelineTextInputView"
-    )
-      Keyboard.dismiss();
-  };
   const handleSubmit = () => {
     Keyboard.dismiss();
     if (username.trim() === "" || email.trim() === "" || password.trim() === "")
@@ -77,77 +39,89 @@ export default function RegistrationScreen() {
   };
 
   return (
-    <View onTouchStart={handleBlur}>
-      <Image
-        source={require("@/assets/images/Photo BG.jpg")}
-        style={styles.bgImage}
-      />
-      <Animated.View style={[styles.container, { bottom: bottomPosition }]}>
-        <View style={styles.importImage}>
-          <Image style={styles.userIcon} />
-          <AddButton
-            onPress={() => console.log("qq")}
-            style={styles.addButton}
-          />
-        </View>
-        <Text style={styles.h2}>Реєстрація</Text>
-        <View style={[styles.formContainer]}>
-          <TextInput
-            onChangeText={setUsername}
-            onBlur={handleBlur}
-            autoComplete="username"
-            style={styles.input}
-            placeholder="Логін"
-          />
-          <TextInput
-            onChangeText={setEmail}
-            value={email}
-            autoComplete="email"
-            autoCorrect={false}
-            style={styles.input}
-            placeholder="Адреса електронної пошти"
-          />
-          <PasswordField
-            type="new-password"
-            onChangeText={(item) => setPassword(item)}
-            value={password}
-            styles={styles}
-          />
-          <Button
-            onPress={() => handleSubmit()}
-            style={{
-              buttonBg: styles.buttonOrangeBg,
-              buttonText: styles.buttonOrangeText,
-            }}
-            title="Зареєстуватися"
-          />
-          <Button
-            onPress={() => console.log("switch to login")}
-            style={{
-              buttonBg: styles.buttonTransperentBg,
-              buttonText: styles.buttonTransperentText,
-            }}
-            title="Вже є акаунт? Увійти"
-          />
-        </View>
-      </Animated.View>
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.wrapper}>
+        <Image
+          source={require("@/assets/images/Photo BG.jpg")}
+          style={styles.bgImage}
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS == "ios" ? "padding" : "height"}
+        >
+          <View style={styles.container}>
+            <View style={styles.importImage}>
+              <Image style={styles.userIcon} />
+              <AddButton
+                onPress={() => console.log("qq")}
+                style={styles.addButton}
+              />
+            </View>
+            <Text style={styles.h2}>Реєстрація</Text>
+
+            <View style={[styles.formContainer]}>
+              <TextInput
+                onChangeText={setUsername}
+                autoComplete="username"
+                style={styles.input}
+                placeholder="Логін"
+              />
+              <TextInput
+                onChangeText={setEmail}
+                value={email}
+                autoComplete="email"
+                autoCorrect={false}
+                style={styles.input}
+                placeholder="Адреса електронної пошти"
+              />
+              <PasswordField
+                type="new-password"
+                onChangeText={(item) => setPassword(item)}
+                value={password}
+                styles={styles}
+              />
+              <Button
+                onPress={() => handleSubmit()}
+                style={{
+                  buttonBg: styles.buttonOrangeBg,
+                  buttonText: styles.buttonOrangeText,
+                }}
+                title="Зареєстуватися"
+              />
+              <Button
+                onPress={() => console.log("switch to login")}
+                style={{
+                  buttonBg: styles.buttonTransperentBg,
+                  buttonText: styles.buttonTransperentText,
+                }}
+                title="Вже є акаунт? Увійти"
+              />
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    display: "flex",
+    height: "100%",
+    justifyContent: "flex-end",
+  },
+
   bgImage: {
     width: "100%",
     height: "100%",
+    position: "absolute",
   },
   container: {
     width: "100%",
-    height: "100%",
-    transform: [{ translateY: -Dimensions.get("window").height * 1.65 }],
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     backgroundColor: "#fff",
     position: "relative",
+    paddingBottom: 30,
   },
 
   importImage: {
@@ -177,21 +151,21 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   formContainer: {
-    display: "flex",
     alignItems: "center",
     gap: 16,
     width: "90%",
     marginHorizontal: "auto",
+    paddingBottom: 0,
   },
 
   input: {
+    width: "100%",
     height: 50,
     padding: 15,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E8E8E8",
     backgroundColor: "#F6F6F6",
-    width: "100%",
     cursor: "pointer",
     position: "relative",
   },
